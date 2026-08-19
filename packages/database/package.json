@@ -1,0 +1,22 @@
+{
+  "name": "@spanish-vocab/database",
+  "version": "0.0.1",
+  "private": true,
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "scripts": {
+    "build": "tsc",
+    "db:generate": "prisma generate",
+    "db:push": "prisma db push",
+    "db:studio": "prisma studio",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.2.0",
+    "dexie": "^4.0.11"
+  },
+  "devDependencies": {
+    "prisma": "^6.2.0",
+    "typescript": "^5.7.0"
+  }
+}

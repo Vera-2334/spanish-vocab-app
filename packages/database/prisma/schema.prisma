@@ -1,0 +1,186 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id              String    @id @default(uuid())
+  email           String    @unique
+  passwordHash    String
+  streak          Int       @default(0)
+  longestStreak   Int       @default(0)
+  lastCheckinDate DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  words         Word[]
+  groups        Group[]
+  tags          Tag[]
+  studyRecords  StudyRecord[]
+  syncLogs      SyncLog[]
+  refreshTokens RefreshToken[]
+}
+
+model RefreshToken {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+}
+
+model Word {
+  id           String       @id @default(uuid())
+  spanish      String
+  chinese      String
+  partOfSpeech PartOfSpeech
+  examples     Json         @default("[]")
+  audioUrl     String?
+  conjugation  Json?
+  tags         String[]     @default([])
+  isStarred    Boolean      @default(false)
+  srsState     Json
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  userId       String
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  groupId      String?
+  group        Group?       @relation(fields: [groupId], references: [id])
+  studyRecords StudyRecord[]
+  wordRelations1 WordRelation[] @relation("Word1")
+  wordRelations2 WordRelation[] @relation("Word2")
+
+  @@index([userId])
+  @@index([userId, partOfSpeech])
+}
+
+model Group {
+  id        String   @id @default(uuid())
+  name      String
+  source    ImportSource
+  createdAt DateTime @default(now())
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  words  Word[]
+
+  @@index([userId])
+}
+
+model Tag {
+  id        String   @id @default(uuid())
+  name      String
+  color     String   @default("#4B8BE0")
+  createdAt DateTime @default(now())
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model StudyRecord {
+  id        String          @id @default(uuid())
+  wordId    String
+  word      Word            @relation(fields: [wordId], references: [id], onDelete: Cascade)
+  mode      StudyMode
+  direction StudyDirection
+  answer    SrsAnswer
+  studiedAt DateTime        @default(now())
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([userId, studiedAt])
+}
+
+model WordRelation {
+  id       String        @id @default(uuid())
+  word1Id  String
+  word1    Word          @relation("Word1", fields: [word1Id], references: [id], onDelete: Cascade)
+  word2Id  String
+  word2    Word          @relation("Word2", fields: [word2Id], references: [id], onDelete: Cascade)
+  type     RelationType
+
+  @@unique([word1Id, word2Id, type])
+}
+
+model SyncLog {
+  id        String   @id @default(uuid())
+  entity    SyncEntity
+  entityId  String
+  action    SyncAction
+  payload   Json
+  timestamp DateTime @default(now())
+  synced    Boolean  @default(false)
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, timestamp])
+  @@index([userId, synced])
+}
+
+// ============================================================
+// Enums
+// ============================================================
+
+enum PartOfSpeech {
+  NM
+  NF
+  NC
+  V
+  ADJ
+  ADV
+  PREP
+  CONJ
+  OTHER
+}
+
+enum ImportSource {
+  manual
+  file
+  anki
+}
+
+enum StudyMode {
+  flashcard
+  srs
+}
+
+enum StudyDirection {
+  es_zh
+  zh_es
+  listening
+}
+
+enum SrsAnswer {
+  remember
+  forget
+}
+
+enum RelationType {
+  synonym
+  antonym
+  cognate
+}
+
+enum SyncEntity {
+  word
+  group
+  tag
+  studyRecord
+}
+
+enum SyncAction {
+  create
+  update
+  delete
+}
