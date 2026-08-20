@@ -1,11 +1,10 @@
 "use client"
 
-import { useState, useEffect, useMemo } from "react"
+import { useState, useEffect } from "react"
 import { GraduationCap, Shuffle, Star, ArrowRight, CalendarCheck, Brain, Flame } from "lucide-react"
 import Link from "next/link"
 import { useWordStore } from "@/stores/wordStore"
 import { useSrsStore } from "@/stores/srsStore"
-import { isDueToday, isMastered } from "@spanish-vocab/database"
 
 export default function StudyPage() {
   const { words, fetchWords } = useWordStore()
@@ -20,11 +19,6 @@ export default function StudyPage() {
 
   useEffect(() => {
     if (words.length > 0) recalcStats()
-  }, [words])
-
-  // 待复习单词
-  const dueWords = useMemo(() => {
-    return words.filter((w) => isDueToday(w.srsState) && !isMastered(w.srsState))
   }, [words])
 
   const hasWords = words.length > 0

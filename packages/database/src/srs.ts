@@ -66,6 +66,40 @@ export function isMastered(state: SrsState): boolean {
 }
 
 /**
+ * 是否学过（至少回答过一次）
+ *
+ * 注意：不能用 `repetitions === 0` 判断「未学」——「忘记」会把 repetitions 清零，
+ * 但 lastReviewedAt 仍会更新。判断是否学过的唯一可靠依据是 lastReviewedAt。
+ */
+export function hasStudied(state: SrsState): boolean {
+  return state.lastReviewedAt > 0
+}
+
+/**
+ * 全新未学（从未回答过）
+ */
+export function isNew(state: SrsState): boolean {
+  return !hasStudied(state)
+}
+
+/**
+ * 学习中（学过但未掌握）
+ */
+export function isLearning(state: SrsState): boolean {
+  return hasStudied(state) && !isMastered(state)
+}
+
+/**
+ * 待复习：学过 + 到期 + 未掌握
+ *
+ * 「忘记」过的词 repetitions 归零后仍会进入这里（因为 lastReviewedAt > 0），
+ * 不会从复习队列中消失。
+ */
+export function isDueForReview(state: SrsState): boolean {
+  return hasStudied(state) && isDueToday(state) && !isMastered(state)
+}
+
+/**
  * 默认 SRS 状态（新单词）
  */
 export function createDefaultSrsState(): SrsState {

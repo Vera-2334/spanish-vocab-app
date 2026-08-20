@@ -5,6 +5,7 @@ import { useSearchParams, useRouter } from "next/navigation"
 import Link from "next/link"
 import { ArrowLeft, CheckCircle, ThumbsDown, ThumbsUp, Shuffle } from "lucide-react"
 import type { StudyDirection } from "@spanish-vocab/database"
+import { isNew, isDueForReview } from "@spanish-vocab/database"
 import { useWordStore } from "@/stores/wordStore"
 import { useStudyStore } from "@/stores/studyStore"
 import { useSrsStore } from "@/stores/srsStore"
@@ -57,16 +58,11 @@ function FlashcardContent() {
 
     let pool = [...words]
     if (srsParam) {
-      // SRS 模式：只显示复习过的、到期未掌握的
-      const todayStart = new Date().setHours(0,0,0,0)
-      pool = pool.filter((w) => {
-        if (!w.srsState || w.srsState.repetitions === 0 || w.srsState.interval >= 21) return false
-        const reviewDay = new Date(w.srsState.nextReviewAt).setHours(0,0,0,0)
-        return reviewDay <= todayStart
-      })
+      // SRS 模式：学过、到期、未掌握的（含「忘记」过的词——忘记会清零 repetitions，但 lastReviewedAt 仍 > 0）
+      pool = pool.filter((w) => !!w.srsState && isDueForReview(w.srsState))
     } else {
-      // 学新词模式：只显示从未学过的（reps===0 且 lastReviewedAt===0）
-      pool = pool.filter((w) => !w.srsState || (w.srsState.repetitions === 0 && w.srsState.lastReviewedAt === 0))
+      // 学新词模式：只显示从未学过的
+      pool = pool.filter((w) => !w.srsState || isNew(w.srsState))
     }
     if (starredParam) {
       pool = pool.filter((w) => w.isStarred)

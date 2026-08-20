@@ -1,5 +1,5 @@
 import type { Word } from "@spanish-vocab/database"
-import { lookupWord, getAdjectiveForms } from "@spanish-vocab/database"
+import { lookupWord, getAdjectiveForms, isNew, isMastered } from "@spanish-vocab/database"
 
 // ============================================================
 // 词典兜底：旧数据可能没存 definitionEs / conjugation，导出前从词典补全
@@ -74,7 +74,7 @@ export function exportCSV(words: Word[]): string {
   const headers = ["西语", "中文", "西语释义", "词性", "动词变位", "例句(西语)", "例句(中文)", "星标", "标签", "掌握状态", "创建时间"]
   const rows = words.map((w0) => {
     const w = enriched(w0)
-    const masterStatus = w.srsState.interval >= 21 ? "已掌握" : w.srsState.repetitions > 0 ? "学习中" : "新学"
+    const masterStatus = isMastered(w.srsState) ? "已掌握" : isNew(w.srsState) ? "新学" : "学习中"
     return [
       escapeCsv(displaySpanish(w.spanish)),
       escapeCsv(w.chinese),

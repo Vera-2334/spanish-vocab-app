@@ -5,7 +5,7 @@ import Link from "next/link"
 import { LayoutDashboard, BookOpen, Brain, Target, Flame, Save, Calendar, BarChart3 } from "lucide-react"
 import { useWordStore } from "@/stores/wordStore"
 import { useSrsStore } from "@/stores/srsStore"
-import { isDueToday, isMastered } from "@spanish-vocab/database"
+import { isMastered, isDueForReview } from "@spanish-vocab/database"
 import { Heatmap } from "@/components/Heatmap"
 import { DonutChart } from "@/components/DonutChart"
 import { shouldRemindBackup } from "@/lib/backup"
@@ -22,7 +22,7 @@ export default function DashboardPage() {
     const mastered = words.filter((w) => isMastered(w.srsState)).length
     const learning = total - mastered
     const retention = total > 0 ? Math.round((mastered / total) * 100) : 0
-    const todayReview = words.filter((w) => isDueToday(w.srsState) && !isMastered(w.srsState)).length
+    const todayReview = words.filter((w) => isDueForReview(w.srsState)).length
     return { total, mastered, learning, retention, todayReview }
   }, [words])
 

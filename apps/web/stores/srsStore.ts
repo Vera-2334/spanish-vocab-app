@@ -1,7 +1,7 @@
 "use client"
 
 import { create } from "zustand"
-import { getDB, computeNextSrsState, isDueToday, isMastered, createDefaultSrsState } from "@spanish-vocab/database"
+import { getDB, computeNextSrsState, isMastered, isNew, isDueForReview, createDefaultSrsState } from "@spanish-vocab/database"
 import { pushSingleWord, pullStreak, pushStreak } from "@/lib/syncEngine"
 import type { SrsState, SrsAnswer } from "@spanish-vocab/database"
 import { useWordStore } from "./wordStore"
@@ -104,13 +104,11 @@ export const useSrsStore = create<SrsStateStore>((set, get) => ({
       const srs = w.srsState
       if (isMastered(srs)) {
         mastered++
-      } else if (isDueToday(srs)) {
-        // 区分已复习过（有历史）和全新单词
-        if (srs.repetitions > 0) {
-          due++
-        } else {
-          newCount++
-        }
+      } else if (isDueForReview(srs)) {
+        // 学过 + 到期 + 未掌握（含「忘记」过的词）
+        due++
+      } else if (isNew(srs)) {
+        newCount++
       }
     }
 

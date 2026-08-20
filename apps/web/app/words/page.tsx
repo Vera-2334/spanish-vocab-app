@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState, useCallback } from "react"
 import Link from "next/link"
 import { BookOpen, Plus, Search, Star, ChevronRight, Tag, X, Check, ChevronDown, Volume2 } from "lucide-react"
-import { PartOfSpeech, PartOfSpeechLabel, getAdjectiveForms } from "@spanish-vocab/database"
+import { PartOfSpeech, PartOfSpeechLabel, getAdjectiveForms, isNew, isLearning, isMastered, isDueForReview } from "@spanish-vocab/database"
 import { useWordStore } from "@/stores/wordStore"
 import { useTagStore } from "@/stores/tagStore"
 
@@ -94,14 +94,13 @@ export default function WordsPage() {
     }
     if (posFilter.length > 0) result = result.filter((w) => posFilter.includes(w.partOfSpeech))
     if (statusFilter.length > 0) {
-      const now = Date.now()
       result = result.filter((w) => {
         const srs = w.srsState
         return statusFilter.some((st) => {
-          if (st === "new") return srs.repetitions === 0 && srs.nextReviewAt <= now
-          if (st === "learning") return srs.repetitions > 0 && srs.interval < 21
-          if (st === "mastered") return srs.interval >= 21
-          if (st === "due") return srs.nextReviewAt <= now && srs.interval < 21
+          if (st === "new") return isNew(srs)
+          if (st === "learning") return isLearning(srs)
+          if (st === "mastered") return isMastered(srs)
+          if (st === "due") return isDueForReview(srs)
           return false
         })
       })
