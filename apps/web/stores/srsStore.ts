@@ -1,7 +1,7 @@
 "use client"
 
 import { create } from "zustand"
-import { getDB, computeNextSrsState, isMastered, isNew, isDueForReview, createDefaultSrsState } from "@spanish-vocab/database"
+import { getDB, computeNextSrsState, isMastered, isNew, isLearning, isDueForReview, createDefaultSrsState } from "@spanish-vocab/database"
 import { pushSingleWord, pullStreak, pushStreak } from "@/lib/syncEngine"
 import type { SrsState, SrsAnswer } from "@spanish-vocab/database"
 import { useWordStore } from "./wordStore"
@@ -65,6 +65,7 @@ interface SrsStateStore {
   dueCount: number
   newCount: number
   masteredCount: number
+  upcomingCount: number
   totalReviewed: number
   streakDays: number
   longestStreak: number
@@ -87,6 +88,7 @@ export const useSrsStore = create<SrsStateStore>((set, get) => ({
   dueCount: 0,
   newCount: 0,
   masteredCount: 0,
+  upcomingCount: 0,
   totalReviewed: 0,
   streakDays: 0,
   longestStreak: 0,
@@ -99,6 +101,7 @@ export const useSrsStore = create<SrsStateStore>((set, get) => ({
     let due = 0
     let newCount = 0
     let mastered = 0
+    let upcomingCount = 0
 
     for (const w of words) {
       const srs = w.srsState
@@ -109,10 +112,13 @@ export const useSrsStore = create<SrsStateStore>((set, get) => ({
         due++
       } else if (isNew(srs)) {
         newCount++
+      } else if (isLearning(srs)) {
+        // 学习中但还没到期（间隔未到）
+        upcomingCount++
       }
     }
 
-    set({ dueCount: due, newCount: newCount, masteredCount: mastered })
+    set({ dueCount: due, newCount: newCount, masteredCount: mastered, upcomingCount })
   },
 
   recordAnswer: async (wordId, answer) => {

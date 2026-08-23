@@ -8,7 +8,7 @@ import { useSrsStore } from "@/stores/srsStore"
 
 export default function StudyPage() {
   const { words, fetchWords } = useWordStore()
-  const { dueCount, newCount, masteredCount, streakDays, longestStreak, recalcStats, checkIn } =
+  const { dueCount, newCount, masteredCount, upcomingCount, streakDays, longestStreak, recalcStats, checkIn } =
     useSrsStore()
   const [shuffle, setShuffle] = useState(false)
   const [starredOnly, setStarredOnly] = useState(false)
@@ -99,10 +99,14 @@ export default function StudyPage() {
             )}
           </div>
 
-          <div className="flex gap-3 text-xs text-[var(--color-text-primary)]">
+          <div className="flex gap-2 text-xs text-[var(--color-text-primary)]">
             <div className="flex-1 bg-white rounded-xl p-2 text-center">
               <p className="text-lg font-extrabold text-[var(--color-primary)]">{dueCount}</p>
               <p className="text-[var(--color-text-secondary)]">待复习</p>
+            </div>
+            <div className="flex-1 bg-white rounded-xl p-2 text-center">
+              <p className="text-lg font-extrabold text-[var(--color-text-primary)]">{upcomingCount}</p>
+              <p className="text-[var(--color-text-secondary)]">间隔中</p>
             </div>
             <div className="flex-1 bg-white rounded-xl p-2 text-center">
               <p className="text-lg font-extrabold text-[var(--color-secondary)]">{newCount}</p>
