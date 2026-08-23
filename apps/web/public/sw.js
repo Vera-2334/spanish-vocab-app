@@ -1,5 +1,5 @@
 // Service Worker · 西语单词 PWA
-const CACHE_NAME = "spanish-vocab-v0.6.0"
+const CACHE_NAME = "spanish-vocab-v0.7.0"
 const CACHE_URLS = [
   "/",
   "/words",
