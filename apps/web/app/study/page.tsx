@@ -11,6 +11,7 @@ export default function StudyPage() {
   const { dueCount, newCount, masteredCount, upcomingCount, streakDays, longestStreak, recalcStats, checkIn } =
     useSrsStore()
   const [shuffle, setShuffle] = useState(false)
+  const [srsShuffle, setSrsShuffle] = useState(false)
   const [starredOnly, setStarredOnly] = useState(false)
 
   useEffect(() => {
@@ -119,13 +120,25 @@ export default function StudyPage() {
           </div>
 
           {dueCount > 0 && (
-            <Link
-              href={`/study/flashcard?direction=es-zh&srs=1`}
-              className="btn-ghost w-full bg-white !border-[var(--color-primary)] !text-[var(--color-primary)] hover:!bg-[var(--color-primary-light)] no-underline text-center"
-            >
-              <Brain size={16} />
-              复习 {dueCount} 个单词
-            </Link>
+            <div className="space-y-2">
+              <Link
+                href={`/study/flashcard?direction=es-zh&srs=1${srsShuffle ? "&shuffle=1" : ""}`}
+                className="btn-ghost w-full bg-white !border-[var(--color-primary)] !text-[var(--color-primary)] hover:!bg-[var(--color-primary-light)] no-underline text-center"
+              >
+                <Brain size={16} />
+                复习 {dueCount} 个单词
+              </Link>
+              <label className="flex items-center justify-center gap-1.5 text-xs cursor-pointer text-[var(--color-text-primary)]">
+                <input
+                  type="checkbox"
+                  checked={srsShuffle}
+                  onChange={() => setSrsShuffle(!srsShuffle)}
+                  className="w-4 h-4 accent-[var(--color-primary)]"
+                />
+                <Shuffle size={13} className="text-[var(--color-text-secondary)]" />
+                乱序复习
+              </label>
+            </div>
           )}
         </div>
       )}
